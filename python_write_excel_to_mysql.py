@@ -108,7 +108,7 @@ if __name__ == '__main__':
     _port = 3306
     _user = "root"
     _password = "123456"
-    _database = "kang_mei"
+    _database = "database_name"
     ####################################################################################################################
 
     start_time = datetime.datetime.now()

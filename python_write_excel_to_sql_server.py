@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 import xlrd
-import pymysql
+import pymssql
+import os
 import threading
 import datetime
-import os
-import re
 
 
 # 生成用于生成表格的sql
 def generate_create_table_sql(column_name_list):
     table_sql = 'create table table_all ('
     if len(column_name_list) > 0:
-        table_sql = table_sql + column_name_list[0] + ' varchar(255)'
+        print(column_name_list[0])
+        table_sql = table_sql + column_name_list[0]
+        table_sql = table_sql + ' varchar(255)'
     if len(column_name_list) > 1:
         for column_name in column_name_list[1:]:
             table_sql = table_sql + ', ' + column_name + ' varchar(255)'
@@ -46,14 +47,13 @@ def read_column_names(excel_file_name):
     return column_name_list
 
 
-# 读取excel里的记录，并存入到mysql
-def read_excel_write_mysql(excel_file_name, _host, _port, _user, _password, _database, thread_id):
+def read_excel_write_sql_server(excel_file_name, _host, _port, _user, _password, _database, thread_id):
     column_name_list = read_column_names(excel_file_name)
     # create_table_sql = generate_create_table_sql(column_name_list)
     insert_table_sql = generate_insert_table_sql(column_name_list)
 
-    # 打开mysql数据库
-    conn = pymysql.connect(host=_host, port=_port, user=_user, password=_password, database=_database, charset='utf8')
+    # 打开sql server数据库
+    conn = pymssql.connect(host=_host, port=_port, user=_user, password=_password, database=_database, charset='utf8', autocommit=True)
     cursor = conn.cursor()
     # cursor.execute(create_table_sql)
 
@@ -82,7 +82,6 @@ def read_excel_write_mysql(excel_file_name, _host, _port, _user, _password, _dat
                 conn.commit()
                 print("线程" + str(thread_id) + "插入第" + str(count) + "条记录！")
 
-
     cursor.close()
     conn.close()
 
@@ -101,12 +100,13 @@ def get_current_directory_excel_files():
 
 
 if __name__ == '__main__':
+
     ####################################################################################################################
     # 待修改：在自己电脑上运行一般只需要修改_user、_password、_database
     ####################################################################################################################
     _host = "localhost"
-    _port = 3306
-    _user = "root"
+    _port = 49669
+    _user = "sa"
     _password = "123456"
     _database = "kang_mei"
     ####################################################################################################################
@@ -116,26 +116,12 @@ if __name__ == '__main__':
     excel_file_name_list = get_current_directory_excel_files()
     column_name_list = read_column_names(excel_file_name_list[0])
     create_table_sql = generate_create_table_sql(column_name_list)
-    # 打开mysql数据库
-    conn = pymysql.connect(host=_host, port=_port, user=_user, password=_password, database=_database, charset='utf8',
+    # 打开sql server数据库
+    conn = pymssql.connect(host=_host, port=_port, user=_user, password=_password, database=_database, charset='utf8',
                            autocommit=True)
     cursor = conn.cursor()
-
-    # # 查询数据库中是否存在数据库表table_all
-    # sql = "show tables;"
-    # cursor.execute(sql)
-    # tables = cursor.fetchall()
-    # tables_list = re.findall('(\'.*?\')', str(tables))
-    # tables_list = [re.sub("'", '', each) for each in tables_list]
-    # if 'table_all' in tables_list:
-    #     # 数据库中已存在数据库表table_all，先删除
-    #     cursor.execute('DROP TABLE table_all;')
-    #     print("已删除旧的数据库表table_all!")
-
     # 数据库中已存在数据库表table_all，先删除
     cursor.execute('DROP TABLE IF EXISTS table_all;')
-
-    # 新建数据库表，表名为table_all
     cursor.execute(create_table_sql)
     print("新建数据库表成功！")
     cursor.close()
@@ -143,9 +129,8 @@ if __name__ == '__main__':
 
     threads = []
     for excel_file_name in excel_file_name_list:
-        # read_excel_write_mysql(excel_file_name, _host, _port, _user, _password, _database)
         # 创建多个线程
-        threads.append(threading.Thread(target=read_excel_write_mysql, args=(excel_file_name, _host, _port, _user, _password, _database, len(threads))))
+        threads.append(threading.Thread(target=read_excel_write_sql_server, args=(excel_file_name, _host, _port, _user, _password, _database, len(threads))))
 
     for thread in threads:
         thread.start()
@@ -159,3 +144,4 @@ if __name__ == '__main__':
     for file in excel_file_name_list:
         print("  " + file)
     print("合并excel成功！MySQL数据库表名为table_all！")
+

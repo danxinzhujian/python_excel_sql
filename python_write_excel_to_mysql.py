@@ -7,7 +7,7 @@ import os
 import re
 
 
-# 生成用于生成表的sql
+# 生成用于生成数据库表的sql
 def generate_create_table_sql(column_name_list):
     table_sql = 'create table table_all ('
     if len(column_name_list) > 0:
@@ -19,7 +19,7 @@ def generate_create_table_sql(column_name_list):
     return table_sql
 
 
-# 生成用于将数据插入表格的sql
+# 生成用于将数据插入数据库表的sql
 def generate_insert_table_sql(column_name_list):
     insert_table_sql_part1 = 'insert into table_all ('
     insert_table_sql_part2 = ' values('

@@ -7,7 +7,7 @@ import os
 import re
 
 
-# 生成用于生成表格的sql
+# 生成用于生成表的sql
 def generate_create_table_sql(column_name_list):
     table_sql = 'create table table_all ('
     if len(column_name_list) > 0:

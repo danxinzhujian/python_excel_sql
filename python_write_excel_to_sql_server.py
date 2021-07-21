@@ -105,7 +105,9 @@ if __name__ == '__main__':
     # 待修改：在自己电脑上运行一般只需要修改_user、_password、_database
     ####################################################################################################################
     _host = "localhost"
-    _port = 12345
+    # 1433是默TCP认端口，TCP动态端口也可以用。查询方法：计算机管理->服务和应用程序->SQL Server配置管理器->SQL Server网络配置->SQLEXPRESS的协议
+    # SQLEXPRESS的协议页面启用“TCP/IP”，然后右键选择“属性”->“IP地址”->最下面的“IPALL”
+    _port = 1433
     _user = "sa"
     _password = "123456"
     _database = "database_name"
